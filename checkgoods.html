@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查看商品评论</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+}
+
+input {
+    padding: 10px;
+    margin-right: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#reviews {
+    margin-top: 20px;
+    text-align: left;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>查看商品评论</h2>
+        <input type="text" id="productName" placeholder="请输入商品名称">
+        <button onclick="checkReviews()">查看评论</button>
+        <div id="reviews"></div>
+    </div>
+
+    <script>
+        function checkReviews() {
+    const productName = document.getElementById('productName').value;
+
+    fetch(`http://localhost:8080/user/checkgoodsreviews?productName=${productName}`)
+        .then(response => response.json())
+        .then(data => {
+            displayReviews(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+function displayReviews(reviews) {
+    const reviewsDiv = document.getElementById('reviews');
+    reviewsDiv.innerHTML = '';
+
+    if (reviews.length === 0) {
+        reviewsDiv.innerHTML = '暂无评论';
+    } else {
+        reviews.forEach(review => {
+            const reviewItem = document.createElement('div');
+            reviewItem.textContent = review.comment;
+            reviewsDiv.appendChild(reviewItem);
+        });
+    }
+}
+    </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>用户注册、登录、发布商品</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+  <h1>用户注册、登录、发布商品</h1>
+  
+  <h2>注册</h2>
+  <label>用户名: <input type="text" id="username-register"></label>
+  <label>密码: <input type="password" id="password-register"></label>
+  <button id="register-btn">注册</button>
+  
+  <h2>登录</h2>
+  <label>用户名: <input type="text" id="username-login"></label>
+  <label>密码: <input type="password" id="password-login"></label>
+  <button id="login-btn">登录</button>
+  
+  <div id="token-container" style="display: none;">
+    <h3>Token</h3>
+    <p id="token"></p>
+  </div>
+  
+  <h2>发布商品</h2>
+  <label>商品名称: <input type="text" id="product-name"></label>
+  <label>商品价格: <input type="number" id="product-price"></label>
+  <label>商品数量: <input type="number" id="product-quantity"></label>
+  <button id="publish-product-btn">发布商品</button>
+  
+  <script>
+    $(document).ready(function() {
+      var token = "";
+
+      $("#register-btn").on("click", function() {
+        var username = $("#username-register").val();
+        var password = $("#password-register").val();
+        
+        var requestData = {
+          username: username,
+          password: password
+        };
+        
+        $.ajax({
+          url: "http://localhost:8080/register",
+          type: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          data: JSON.stringify(requestData),
+          success: function(response) {
+            alert("注册成功");
+          },
+          error: function(xhr, status, error) {
+            console.log("注册失败:", error);
+          }
+        });
+      });
+      
+      $("#login-btn").on("click", function() {
+        var username = $("#username-login").val();
+        var password = $("#password-login").val();
+        
+        var requestData = {
+          username: username,
+          password: password
+        };
+        
+        $.ajax({
+          url: "http://localhost:8080/login",
+          type: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          data: JSON.stringify(requestData),
+          success: function(response) {
+            handleLoginSuccess(response);
+          },
+          error: function(xhr, status, error) {
+            console.log("登录失败:", error);
+          }
+        });
+      });
+
+      $("#publish-product-btn").on("click", function() {
+        var name = $("#product-name").val();
+        var price = parseInt($("#product-price").val());
+        var quantity = parseInt($("#product-quantity").val());
+        
+        var requestData = {
+          name: name,
+          price: price,
+          quantity: quantity
+        };
+        
+        $.ajax({
+          url: "http://localhost:8080/seller/uploadgoodsinformation",
+          type: "POST",
+          headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+          },
+          data: JSON.stringify(requestData),
+          success: function(response) {
+            alert("商品发布成功");
+          },
+          error: function(xhr, status, error) {
+            console.log("商品发布失败:", error);
+          }
+        });
+      });
+
+      function handleLoginSuccess(response) {
+        token = response.token;
+        $("#token").text(token);
+        $("#token-container").show();
+      }
+    });
+  </script>
+</body>
+</html>

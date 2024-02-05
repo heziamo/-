@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Display</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+    .product {
+        margin-bottom: 20px;
+        border: 1px solid #e0e0e0;
+        padding: 10px;
+    }
+    .product p.price {
+        color: red;
+        font-weight: bold;
+        margin: 5px 0;
+    }
+    .product p.quantity {
+        color: #888;
+        font-size: 12px;
+    }
+    .comment {
+        margin-top: 10px;
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+    }
+    #back-to-top {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #333;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+#back-to-top:hover {
+    background-color: #555;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>商品展示</h2>
+    
+    <input type="text" id="searchInput" placeholder="输入商品名称搜索">
+    <button onclick="searchProduct()">搜索</button><br><br>
+
+    <div id="productList"></div>
+    
+    <button onclick="buyAllFromCart()">清空购物车并购买</button>
+    <a id="back-to-top" href="#">返回顶部</a>
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+let cartItems = [];
+
+fetch("http://localhost:8080/user/checkgoodsinformation", {
+    method: "GET",
+    headers: {
+        Authorization: "Bearer " + token
+    }
+})
+.then(response => response.json())
+.then(data => {
+    displayProducts(data);
+})
+.catch(error => {
+    console.error("Error:", error);
+});
+
+function displayProducts(products) {
+    const productListDiv = document.getElementById("productList");
+    productListDiv.innerHTML = "";
+    products.forEach(product => {
+        const productDiv = document.createElement("div");
+        productDiv.classList.add("product");
+
+        productDiv.innerHTML = `
+            <p>${product.name}</p>
+            <p class="price">价格: <span>${product.price}</span></p>
+            <p class="quantity">数量: <span>${product.quantity}</span></p>
+            <label for="quantity">数量:</label>
+            <input type="number" id="quantity${product.name}" value="1" min="1">
+            <button onclick="addToCart('${product.name}')">加入购物车</button>
+            <textarea id="comment${product.name}" placeholder="输入您的评论"></textarea>
+            <button onclick="submitComment('${product.name}')">提交评论</button>
+            <div id="commentSection${product.name}" class="comment"></div>
+        `;
+        
+        productListDiv.appendChild(productDiv);
+        loadComments(product.name);
+    });
+}
+
+function addToCart(name) {
+    const quantity = parseInt(document.getElementById(`quantity${name}`).value, 10);
+    const item = { name: name, quantity: quantity };
+
+    fetch("http://localhost:8080/user/addcart", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+        },
+        body: JSON.stringify(item)
+    })
+    .then(response => {
+        if (response.ok) {
+            alert("商品已成功添加到购物车！");
+        } else {
+            alert("添加商品到购物车时出现问题，请重试。");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
+}
+
+function submitComment(productName) {
+    const commentText = document.getElementById(`comment${productName}`).value;
+
+    fetch("http://localhost:8080/user/reviewgoods", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({ name: productName, content: commentText })
+    })
+    .then(response => {
+        if (response.ok) {
+            alert("评论已提交！");
+            loadComments(productName);
+        } else {
+            alert("提交评论时出现问题，请重试。");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
+}
+
+function loadComments(productName) {
+    fetch("http://localhost:8080/user/checkgoodsreviews", {
+        method: "GET",
+        headers: {
+            Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({ name: productName, content: commentText })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const commentSection = document.getElementById(`commentSection${productName}`);
+        commentSection.innerHTML = "";
+
+        data.forEach(comment => {
+            const commentDiv = document.createElement("div");
+            commentDiv.textContent = `${comment.user}: ${comment.content}`;
+            commentSection.appendChild(commentDiv);
+        });
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
+}
+
+function searchProduct() {
+    const searchInput = document.getElementById("searchInput").value.toLowerCase();
+    fetch("http://localhost:8080/user/checkgoodsinformation", {
+        method: "GET",
+        headers: {
+            Authorization: "Bearer " + token
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const searchResult = data.filter(product => product.name.toLowerCase().includes(searchInput));
+        displayProducts(searchResult);
+        if (searchResult.length === 0) {
+            alert("未找到匹配的商品。");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
+}
+
+function buyAllFromCart() {
+    fetch("http://localhost:8080/user/settlecart", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+        },
+        body: JSON.stringify(cartItems)
+    })
+    .then(response => {
+        if (response.ok) {
+            alert("购买成功！");
+            cartItems = [];
+            displayProducts(); // 更新购物车后重新显示商品列表
+        } else {
+            alert("购买过程中出现问题，请重试。");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
+}
+let backToTopButton = document.getElementById("back-to-top");
+
+backToTopButton.addEventListener("click", () => {
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+});
+
+window.addEventListener("scroll", () => {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        backToTopButton.style.display = "block";
+    } else {
+        backToTopButton.style.display = "none";
+    }
+});
+</script>
+</body>
+</html>

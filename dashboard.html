@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电商页面</title>
+    <style>
+        .product {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .product h2 {
+            margin: 0;
+        }
+
+        .product p {
+            margin: 5px 0;
+        }
+
+        .product .price {
+            color: red;
+            font-weight: bold;
+        }
+
+        .product .quantity {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+        .features {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f1f1f1;
+            margin: 0;
+        }
+        *{
+            margin: 0;
+            padding: 0;
+            text-decoration: none;
+            list-style: none;
+        }
+        .main {
+            width: 1200px;
+            margin: auto;
+
+        }
+        .header,.nav,.container,.footer {
+            float: left;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .header {
+            background-image: url(top.jpg);
+            padding: 40px;
+            text-align: center;
+        }
+        .nav {
+            background-color: #333;
+            text-align: right;
+        }
+        .nav a {
+            color: #fff;
+            padding: 10px 20px;
+            display: inline-block;
+        }
+        .nav a:hover {
+            background-color: #bbb;
+            color: #000;
+        }
+        .lside {
+            width: 250px;
+            float: left;
+        }
+        .rside {
+            width: 250px;
+            float: right;
+        }
+        .lside,.rside.content {
+            padding: 5px;
+            box-sizing: border-box;
+        }
+        .footer {
+            padding: 15px;
+            background-color: #ccc;
+            text-align: center;
+        }
+        @media screen and (max-width:700px) {
+            .lside,.rside.content{
+                width: 100%;
+                margin: 0px;
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <div class="main">
+        <div class="header">
+            <h1>电商平台</h1>
+        </div>
+        <div class="nav">
+            <a href="showhomepage.html">用户主页</a>
+            <a href="uploadgoodsinformation.html">发布商品</a>
+            <a href="login.html">登录</a>
+            <a href="register.html">注册</a>
+            <a href="checkgoodsinformation.html">商品展示</a>
+            <a href="checkgoods.html">查看评论</a>
+
+        </div>
+        <div class="content">
+            <div class="lside">
+                <h2></h2>
+            </div>
+            <div class="rside">
+                <h2></h2>
+            </div>
+            <div class="container">
+                <div class="slideshow-container">
+                    <div class="slide"><img src="2.jpg" alt="电商平台"></div>
+                    <div class="slide"><img src="1.jpg" alt="电商平台"></div>
+                    <div class="slide"><img src="4.jpg" alt="电商平台"></div>
+                </div>
+            
+                <button class="prev" onclick="plusSlides(-1)">&#10094;</button>
+                <button class="next" onclick="plusSlides(1)">&#10095;</button>
+        <div class="footer">
+            <h6>2024.2.4@电商平台</h6>
+        </div>
+    </div>
+    <script>
+        let slideIndex = 1;
+
+showSlides(slideIndex);
+
+function plusSlides(n) {
+    showSlides(slideIndex += n);
+}
+
+function showSlides(n) {
+    let i;
+    const slides = document.getElementsByClassName("slide");
+
+    if (n > slides.length) {
+        slideIndex = 1;
+    }
+    if (n < 1) {
+        slideIndex = slides.length;
+    }
+
+    for (i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";
+    }
+
+    slides[slideIndex - 1].style.display = "block";
+}
+
+setInterval(() => {
+    plusSlides(1);
+}, 5000);  // 自动播放，每5秒切换一次
+    </script>
+</body>
+</html>

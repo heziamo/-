@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>用户主页</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <div class="profile">
+        <h2>用户个人信息</h2>
+        <div id="userInfo"></div>
+
+        <h3>修改信息</h3>
+        <form id="updateForm">
+            <label for="gender">性别:</label>
+            <input type="text" id="gender" placeholder="请输入性别">
+            <label for="sign">简介:</label>
+            <input type="text" id="sign" placeholder="请输入简介">
+            <button type="submit">保存</button>
+        </form>
+    </div>
+</div>
+
+<script>
+// 获取用户信息并展示
+const token = localStorage.getItem('token');
+
+fetch('http://localhost:8080/user/showhomepage', {
+    method: 'GET',
+    headers: {
+        'Authorization': 'Bearer ' + token
+    }
+})
+.then(response => response.json())
+.then(data => {
+    const userInfoDiv = document.getElementById('userInfo');
+    userInfoDiv.innerHTML = `
+        <p>用户名: ${data.username}</p>
+        <p>性别: ${data.gender}</p>
+        <p>简介: ${data.sign}</p>
+    `;
+})
+.catch(error => {
+    console.error('Error:', error);
+});
+
+// 更新用户信息
+document.getElementById("updateForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+    
+    const gender = document.getElementById("gender").value;
+    const sign = document.getElementById("sign").value;
+    
+    const updatedInfo = {
+        gender: gender,
+        sign: sign
+    };
+
+    fetch('http://localhost:8080/user/changehomepage', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(updatedInfo)
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('用户信息已更新！');
+        } else {
+            alert('信息更新失败，请重试。');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+</script>
+</body>
+</html>
